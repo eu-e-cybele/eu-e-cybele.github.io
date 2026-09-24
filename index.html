@@ -129,7 +129,7 @@
     <div class="bloco"><b id="minutos">00</b><span>minutos</span></div>
     <div class="bloco"><b id="segundos">00</b><span>segundos</span></div>
   </div>
-  <p class="legenda">Faltam <strong><span id="diasTexto">183</span> dias</strong>, meu amor. 💞<br>E eu já tô contando cada segundo.</p>
+  <p class="legenda"><span id="diasTexto">Faltam <strong>183 dias</strong></span>, meu amor. 💞<br>E eu já tô contando cada segundo.</p>
   <div class="juntos">Já estamos juntos há <strong id="jaJuntos">…</strong> 🥰</div>
 </section>
 
@@ -178,7 +178,7 @@
 <!-- Pergunta -->
 <section id="pergunta" class="aparece">
   <div class="batida">💍</div>
-  <h2>Se lembra, faltam <span id="diasPergunta">183</span> dias</h2>
+  <h2>Se lembra, <span id="diasPergunta">faltam 183 dias</span></h2>
   <div class="botoes">
     <button class="btn sim" id="btnSim">Sim! 💖</button>
     <button class="btn nao" id="btnNao">Não</button>
@@ -244,7 +244,7 @@ const MOTIVOS = [
   'Porque você me faz querer ser alguém melhor todos os dias.'
 ];
 const INICIO_NAMORO = new Date(2026, 2, 24);            // 24/03/2026
-const ALVO = new Date(2027, 2, 26, 23, 59, 59);      // 24/09/2026 + 183 dias
+const ALVO = new Date(2027, 2, 26);                  // 26/03/2027 (183 dias depois de 24/09/2026)
 
 /* ====== Corações caindo ====== */
 const chuva = document.getElementById('coracoes');
@@ -292,15 +292,25 @@ document.getElementById('coracaoGrande').addEventListener('click',e=>{
 const pad=n=>String(n).padStart(2,'0');
 function atualiza(){
   const agora=new Date();
-  let d=Math.max(0,ALVO-agora);
-  const dias=Math.floor(d/864e5); d%=864e5;
+  const hoje=new Date(agora.getFullYear(),agora.getMonth(),agora.getDate());
+  // dias de calendário até 26/03/2027; horas/min/seg = o que falta pra virar o dia
+  const dias=Math.max(0,Math.round((ALVO-hoje)/864e5));
+  let d=dias>0 ? new Date(hoje.getFullYear(),hoje.getMonth(),hoje.getDate()+1)-agora : 0;
   document.getElementById('dias').textContent=dias;
-  document.getElementById('diasTexto').textContent=dias;
-  document.getElementById('diasPergunta').textContent=dias;
+  const faltam=(dias===1?'falta ':'faltam ')+dias+(dias===1?' dia':' dias');
+  const elTexto=document.getElementById('diasTexto'), elPerg=document.getElementById('diasPergunta');
+  if(elTexto) elTexto.innerHTML=faltam.charAt(0).toUpperCase()+faltam.slice(1).replace(/(\d+ dias?)/,'<strong>$1</strong>');
+  if(elPerg) elPerg.textContent=faltam;
   document.getElementById('horas').textContent=pad(Math.floor(d/36e5)); d%=36e5;
   document.getElementById('minutos').textContent=pad(Math.floor(d/6e4)); d%=6e4;
   document.getElementById('segundos').textContent=pad(Math.floor(d/1e3));
-  const juntos=Math.floor((agora-INICIO_NAMORO)/864e5);
+  if(dias===0 && !atualiza.chegou){
+    atualiza.chegou=true;
+    document.querySelector('#contagem h2').textContent='Chegou o nosso dia! 💖';
+    document.querySelector('#contagem .legenda').innerHTML='Hoje é <strong>26 de março</strong>, meu amor. 💞<br>Contei cada segundo até aqui.';
+    document.querySelector('#pergunta h2').textContent='Se lembra? Chegou o dia 💖';
+  }
+  const juntos=Math.round((hoje-INICIO_NAMORO)/864e5);
   document.getElementById('jaJuntos').textContent=juntos+' dias';
 }
 atualiza(); setInterval(atualiza,1000);
