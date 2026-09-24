@@ -369,8 +369,20 @@ document.getElementById('btnSim').addEventListener('click',e=>{
 });
 
 /* ====== Aparecer ao rolar ====== */
-const obs=new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting)en.target.classList.add('visivel')}),{threshold:.15});
-document.querySelectorAll('.aparece').forEach(el=>obs.observe(el));
+// aparece assim que o topo da seção entra na tela (vale pra seções bem compridas, como a galeria no celular)
+const secoes=document.querySelectorAll('.aparece');
+if('IntersectionObserver' in window){
+  const obs=new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting){en.target.classList.add('visivel');obs.unobserve(en.target);}}),{threshold:0,rootMargin:'0px 0px -12% 0px'});
+  secoes.forEach(el=>obs.observe(el));
+}else secoes.forEach(el=>el.classList.add('visivel'));
+// reserva: a cada rolagem, mostra qualquer seção cujo topo já entrou na tela
+function confereSecoes(){
+  const lim=innerHeight*0.9;
+  secoes.forEach(el=>{ if(!el.classList.contains('visivel') && el.getBoundingClientRect().top<lim) el.classList.add('visivel'); });
+}
+addEventListener('scroll',confereSecoes,{passive:true});
+addEventListener('resize',confereSecoes);
+confereSecoes();
 </script>
 <script src="efeitos/musica.js"></script>
 <script src="efeitos/intro.js"></script>
